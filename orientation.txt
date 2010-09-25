@@ -1,0 +1,72 @@
+ libmeegotouch:src/corelib/widgets/mwindow.cpp
+ 837 M::Orientation MWindow::orientation() const
+ 838 {
+ 839     Q_D(const MWindow);
+ 840 
+ 841     if (d->sceneManager) {
+ 842         return d->sceneManager->orientation();
+ 843     } else {
+ 844         return d->orientation(d->angle);
+ 845     }
+ 846 }
+
+libmeegotouch:src/corelib/scene/mscenemanager.cpp
+2053 M::Orientation MSceneManager::orientation() const
+2054 {
+2055     Q_D(const MSceneManager);
+2056 
+2057     return d->orientation(d->angle);
+2058 }
+
+
+libmeegotouch:src/corelib/events/morientationtracker.cpp
+185 M::OrientationAngle MOrientationTracker::orientationAngle() const
+186 {
+187     Q_D(const MOrientationTracker);
+188 
+189     return d->currentAngle;
+190 }
+
+libmeegotouch:src/corelib/events/morientationtracker.cpp
+void MOrientationTrackerPrivate::updateOrientationAngle()
+{
+#ifdef HAVE_CONTEXTSUBSCRIBER
+    ......
+    QString edge = topEdgeProperty.value().toString();
+    ......
+    if (edge == "top" && (MDeviceProfile::instance()->orientationAngleIsSupported(M::Angle0, isKeyboardOpen))) {
+        angle = M::Angle0;
+    } else if (edge == "left" && (MDeviceProfile::instance()->orientationAngleIsSupported(M::Angle270, isKeyboardOpen))) {
+        angle = M::Angle270;
+        orientation = M::Portrait;
+    } else if (edge == "right" && (MDeviceProfile::instance()->orientationAngleIsSupported(M::Angle90, isKeyboardOpen))) {
+        angle = M::Angle90;
+        orientation = M::Portrait;
+    } else if (edge == "bottom" && (MDeviceProfile::instance()->orientationAngleIsSupported(M::Angle180, isKeyboardOpen))) {
+        angle = M::Angle180;
+    } else {
+    .......
+
+    if (angle != currentAngle) {
+        currentAngle = angle;
+	.......
+       }
+    }
+#endif
+}
+
+
+libmeegotouch:src/corelib/events/morientationtracker.cpp
+40     , topEdgeProperty("Screen.TopEdge")
+ ............
+60 #ifdef HAVE_CONTEXTSUBSCRIBER
+61     connect(&topEdgeProperty, SIGNAL(valueChanged()),
+62             this, SLOT(updateOrientationAngle()));
+63     connect(&isCoveredProperty, SIGNAL(valueChanged()),
+64             this, SLOT(isCoveredChanged()));
+65     connect(MKeyboardStateTracker::instance(), SIGNAL(stateChanged()),
+66             this, SLOT(updateOrientationAngle()));
+67 #endif
+
+contextkit:libcontextsubscriber/src/contextproperty.cpp
+
